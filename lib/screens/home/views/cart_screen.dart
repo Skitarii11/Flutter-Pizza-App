@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pizza_app/screens/home/blocs/cart/cart_bloc.dart';
-import 'package:user_repository/cart_repository.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -93,7 +92,7 @@ class CartScreen extends StatelessWidget {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: state.items.isEmpty ? null : () {
-                            // Proceed to checkout
+                            // tulbur
                             print('Proceed to Checkout');
                           },
                           style: ElevatedButton.styleFrom(

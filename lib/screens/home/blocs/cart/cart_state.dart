@@ -10,7 +10,7 @@ sealed class CartState extends Equatable {
 final class CartLoading extends CartState {}
 class CartLoaded extends CartState {
   final List<CartItem> items;
-  final double totalPrice; // Calculated
+  final double totalPrice;
 
   const CartLoaded(this.items, {this.totalPrice = 0.0});
 

@@ -205,7 +205,9 @@ class HomeScreen extends StatelessWidget {
                                             .showSnackBar(
                                           SnackBar(
                                               content: Text(
-                                                  '${currentPizza.name} added to cart!')),
+                                                  '${currentPizza.name} added to cart!'),
+                                                  duration: const Duration(seconds: 2),
+                                                  backgroundColor: Colors.green,),
                                         );
                                       },
                                       icon: const Icon(
