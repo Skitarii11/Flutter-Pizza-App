@@ -8,6 +8,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pizza_app/screens/home/blocs/cart/cart_bloc.dart';
 import 'package:user_repository/cart_repository.dart';
 import 'package:user_repository/user_repository.dart';
+import 'package:user_repository/order_repository.dart';
+import 'package:pizza_app/screens/home/blocs/order/order_bloc.dart';
+import 'package:pizza_app/screens/home/blocs/weather/weather_bloc.dart';
+import 'package:user_repository/weather_repository.dart';
 
 import 'screens/auth/views/welcome_screen.dart';
 import 'screens/home/views/home_screen.dart';
@@ -30,7 +34,18 @@ class MyAppView extends StatelessWidget {
               BlocProvider<GetPizzaBloc>(
                 create: (context) => GetPizzaBloc(
                   pizzaRepository: context.read<PizzaRepo>(),
-                )..add(GetPizza()),
+                )..add(const LoadPizzas()),
+              ),
+              BlocProvider<WeatherBloc>(
+                create: (context) => WeatherBloc(
+                  weatherRepository: context.read<WeatherRepository>(),
+                )..add(const FetchWeather('Ulaanbaatar')),
+              ),
+              BlocProvider<OrderBloc>(
+                create: (context) => OrderBloc(
+                  orderRepo: context.read<OrderRepo>(),
+                  firebaseAuth: FirebaseAuth.instance,
+                ),
               ),
               BlocProvider<CartBloc>(
                 create: (context) => CartBloc(

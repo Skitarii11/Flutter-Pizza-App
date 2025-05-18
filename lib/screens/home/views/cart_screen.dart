@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pizza_app/screens/home/blocs/cart/cart_bloc.dart';
+import 'package:pizza_app/screens/home/blocs/order/order_bloc.dart';
+import 'package:pizza_app/screens/home/views/order_history_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -11,8 +13,46 @@ class CartScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Your Cart'),
         backgroundColor: Theme.of(context).colorScheme.background,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Order History',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
+              );
+            },
+          ),
+        ],
       ),
-      body: BlocBuilder<CartBloc, CartState>(
+      body: BlocListener<OrderBloc, OrderState>(
+        listener: (context, orderState) {
+          if (orderState is OrderPlacementSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Order placed successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          } else if (orderState is OrderPlacementFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Order failed: ${orderState.error}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (orderState is OrderPlacementInProgress) {
+             ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Placing your order...'),
+                duration: Duration(seconds: 1),
+              ),
+            );
+          }
+        },
+      
+      child: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
           if (state is CartLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -29,6 +69,8 @@ class CartScreen extends StatelessWidget {
                 ),
               );
             }
+            final activeCartItems = state.items.where((item) => item.quantity > 0).toList();
+            final bool canCheckout = activeCartItems.isNotEmpty;
             return Column(
               children: [
                 Expanded(
@@ -36,8 +78,10 @@ class CartScreen extends StatelessWidget {
                     itemCount: state.items.length,
                     itemBuilder: (context, index) {
                       final item = state.items[index];
+                      bool isQuantityZero = item.quantity == 0;
                       return Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        color: isQuantityZero ? Colors.grey.shade300 : null,
                         child: ListTile(
                           leading: SizedBox(
                             width: 60,
@@ -50,10 +94,15 @@ class CartScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                                onPressed: () {
-                                  context.read<CartBloc>().add(DecreaseItemQuantity(item.id));
-                                },
+                                icon: Icon(
+                                  Icons.remove_circle_outline,
+                                  color: isQuantityZero ? Colors.grey : Colors.orange,
+                                ),
+                                onPressed: isQuantityZero 
+                                    ? null
+                                    : () {
+                                        context.read<CartBloc>().add(DecreaseItemQuantity(item.id));
+                                      },
                               ),
                               Text('${item.quantity}'),
                               IconButton(
@@ -91,10 +140,18 @@ class CartScreen extends StatelessWidget {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: state.items.isEmpty ? null : () {
-                            // tulbur
-                            print('Proceed to Checkout');
-                          },
+                           onPressed: !canCheckout
+                              ? null 
+                              : () {
+                                  if (state is CartLoaded && canCheckout) {
+                                      context.read<OrderBloc>().add(
+                                            PlaceNewOrder(
+                                              cartItems: activeCartItems,
+                                              totalPrice: state.totalPrice,
+                                            ),
+                                          );
+                                    }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             foregroundColor: Colors.white,
@@ -114,6 +171,7 @@ class CartScreen extends StatelessWidget {
           return const Center(child: Text('Something went wrong with the cart.'));
         },
       ),
+    )
     );
   }
 }

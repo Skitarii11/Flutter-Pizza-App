@@ -51,11 +51,9 @@ class FirebaseCartRepo implements CartRepo {
 
   @override
   Future<void> updateCartItemQuantity(String userId, String cartItemId, int newQuantity) async {
-    if (newQuantity <= 0) {
-      await removeCartItem(userId, cartItemId);
-    } else {
-      await _userCartCollection(userId).doc(cartItemId).update({'quantity': newQuantity});
-    }
+    final quantityToSet = newQuantity < 0 ? 0 : newQuantity;
+
+    await _userCartCollection(userId).doc(cartItemId).update({'quantity': quantityToSet});
   }
 
   @override

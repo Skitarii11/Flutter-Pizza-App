@@ -56,10 +56,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     if (_currentUser == null) return;
      if (state is CartLoaded) {
       final currentState = state as CartLoaded;
-      final itemToUpdate = currentState.items.firstWhere((item) => item.id == event.cartItemId, orElse: () => throw Exception("Item not found"));
+      final itemToUpdate = currentState.items.firstWhere(
+        (item) => item.id == event.cartItemId,
+      );
+      int newQuantity = itemToUpdate.quantity - 1;
 
       try {
-        await _cartRepo.updateCartItemQuantity(_currentUser!.uid, event.cartItemId, itemToUpdate.quantity - 1);
+        await _cartRepo.updateCartItemQuantity(_currentUser!.uid, event.cartItemId, newQuantity);
       } catch (e) {
         emit(CartError("Failed to decrease quantity: ${e.toString()}"));
       }

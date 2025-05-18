@@ -5,6 +5,8 @@ import 'package:user_repository/user_repository.dart';
 import 'app_view.dart';
 import 'blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:user_repository/cart_repository.dart';
+import 'package:user_repository/order_repository.dart';
+import 'package:user_repository/weather_repository.dart';
 
 class MyApp extends StatelessWidget {
   final UserRepository userRepository;
@@ -19,6 +21,12 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider<PizzaRepo>(
           create: (context) => FirebasePizzaRepo(),
+        ),
+        RepositoryProvider<WeatherRepository>(
+          create: (context) => WeatherRepository(),
+        ),
+        RepositoryProvider<OrderRepo>(
+          create: (context) => FirebaseOrderRepo(),
         ),
         RepositoryProvider<CartRepo>(
           create: (context) => FirebaseCartRepo(),
